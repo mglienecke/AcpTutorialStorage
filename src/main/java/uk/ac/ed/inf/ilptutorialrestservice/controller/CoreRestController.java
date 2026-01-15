@@ -49,17 +49,6 @@ public class CoreRestController {
     }
 
     /**
-     * a simple alive check
-     *
-     * @return true (always)
-     */
-    @GetMapping(value = {"/isAlive"})
-    public boolean isAlive() {
-        return true;
-    }
-
-
-    /**
      * GET with HTML result
      * @return
      */
