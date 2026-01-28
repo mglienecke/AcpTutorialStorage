@@ -9,13 +9,26 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>uk.ac.ed.inf</groupId>
-	<artifactId>AcpTutorial</artifactId>
+	<artifactId>AcpTutorialStorage</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>AcpTutorial</name>
-	<description>AcpTutorial</description>
+	<name>AcpTutorialStorage</name>
+	<description>AcpTutorialStorage</description>
 	<properties>
 		<java.version>21</java.version>
+		<aws.java.sdk.version>2.41.16</aws.java.sdk.version>
 	</properties>
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>software.amazon.awssdk</groupId>
+				<artifactId>bom</artifactId>
+				<version>2.21.20</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+
+		</dependencies>
+	</dependencyManagement>
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -62,6 +75,12 @@
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
 			<scope>provided</scope>
+		</dependency>
+
+
+		<dependency>
+			<groupId>software.amazon.awssdk</groupId>
+			<artifactId>s3</artifactId>
 		</dependency>
 	</dependencies>
 	<build>

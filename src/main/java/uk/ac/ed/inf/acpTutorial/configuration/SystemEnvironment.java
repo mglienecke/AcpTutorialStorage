@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
+import software.amazon.awssdk.regions.Region;
 
 @Configuration
 public class SystemEnvironment {
@@ -14,5 +15,20 @@ public class SystemEnvironment {
     @Bean(name = "ilpServiceEndpoint")
     public String getIlpServiceEndpoint(){
         return ilpServiceEndpoint;
+    }
+
+    public static final String AWS_USER = "test";
+    public String getAwsUser() {
+        return AWS_USER;
+    }
+
+    public static final String AWS_SECRET = "test";
+    public String getAwsSecret() {
+        return AWS_SECRET;
+    }
+
+    public static final Region AWS_REGION = Region.US_EAST_1;
+    public Region getAwsRegion() {
+        return AWS_REGION;
     }
 }
