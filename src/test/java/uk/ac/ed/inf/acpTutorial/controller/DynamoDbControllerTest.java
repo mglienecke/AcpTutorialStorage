@@ -25,6 +25,7 @@ public class DynamoDbControllerTest {
         assertTrue(dynamoDbController.listTables().contains(tableName));
     }
 
+
     @Test
     public void testCreateObjectSucceeds() {
         String tableName = "test-table-" + System.currentTimeMillis();
@@ -35,6 +36,7 @@ public class DynamoDbControllerTest {
         dynamoDbController.createObject(tableName, key, content);
         
         // Verify object (key) exists in list
-        assertTrue(Objects.requireNonNull(dynamoDbController.listTableObjects(tableName).getBody()).contains("key"));
+        String responseBody = Objects.requireNonNull(dynamoDbController.listTableObjects(tableName).getBody());
+        assertTrue(responseBody.contains("\"key\": \"" + key + "\""));
     }
 }
