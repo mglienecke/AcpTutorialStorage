@@ -1,19 +1,15 @@
 package uk.ac.ed.inf.acpTutorial.controller;
 
 import com.google.gson.Gson;
-import lombok.AllArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.env.Environment;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
-import uk.ac.ed.inf.acpTutorial.configuration.SystemEnvironment;
+import uk.ac.ed.inf.acpTutorial.configuration.SystemConfiguration;
 import uk.ac.ed.inf.acpTutorial.dto.Restaurant;
 import uk.ac.ed.inf.acpTutorial.dto.Tuple;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
-import java.util.List;
 import java.util.Objects;
 
 @RestController()
@@ -28,7 +24,7 @@ public class CoreRestController {
 
     // Is deprecated
     // @Autowired
-    private final SystemEnvironment acpSystemEnvironment;
+    private final SystemConfiguration acpSystemConfiguration;
 
     /**
      * Retrieves the ILP service endpoint URL from the system environment.
@@ -37,7 +33,7 @@ public class CoreRestController {
      */
     @GetMapping("/ilp-endpoint")
     public String getIlpServiceEndpoint() {
-        return acpSystemEnvironment.getIlpServiceEndpoint();
+        return acpSystemConfiguration.getIlpServiceEndpoint();
     }
 
     /**
@@ -54,10 +50,10 @@ public class CoreRestController {
     /**
      * Constructs a new CoreRestController instance with the provided environment.
      *
-     * @param acpSystemEnvironment the system environment
+     * @param acpSystemConfiguration the system environment
      */
-    public CoreRestController(SystemEnvironment acpSystemEnvironment) {
-        this.acpSystemEnvironment = acpSystemEnvironment;
+    public CoreRestController(SystemConfiguration acpSystemConfiguration) {
+        this.acpSystemConfiguration = acpSystemConfiguration;
     }
 
     /**

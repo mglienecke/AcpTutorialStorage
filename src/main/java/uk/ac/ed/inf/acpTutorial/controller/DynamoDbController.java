@@ -8,6 +8,7 @@ import software.amazon.awssdk.services.dynamodb.model.*;
 import uk.ac.ed.inf.acpTutorial.configuration.DynamoDbConfiguration;
 import uk.ac.ed.inf.acpTutorial.service.DynamoDbService;
 import java.util.List;
+import java.util.Map;
 
 @RestController()
 @RequestMapping("/api/v1/acp/dynamo")
@@ -43,6 +44,11 @@ public class DynamoDbController {
 
     @PutMapping("/create-object/{table}/{key}")
     public void createObject(@PathVariable String table, @PathVariable String key, @RequestBody String objectContent) {
+        dynamoDbService.createObject(table, key, objectContent);
+    }
+
+    @PutMapping("/create-object-from-map/{table}/{key}")
+    public void createObjectFromMap(@PathVariable String table, @PathVariable String key, @RequestBody Map<String, String> objectContent) {
         dynamoDbService.createObject(table, key, objectContent);
     }
 

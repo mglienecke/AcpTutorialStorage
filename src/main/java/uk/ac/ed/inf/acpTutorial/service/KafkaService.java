@@ -6,7 +6,6 @@ import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.services.sqs.SqsClient;
 import software.amazon.awssdk.services.sqs.model.*;
-import uk.ac.ed.inf.acpTutorial.configuration.JmsConfiguration;
 import uk.ac.ed.inf.acpTutorial.configuration.SqsConfiguration;
 import uk.ac.ed.inf.acpTutorial.configuration.SystemConfiguration;
 
@@ -15,24 +14,20 @@ import java.util.List;
 
 @Slf4j
 @Service
-public class SqsService implements MessageQueueService {
+public class KafkaService {
 
     private final SqsConfiguration sqsConfiguration;
     private final SystemConfiguration systemConfiguration;
-    private final JmsConfiguration jmsConfiguration;
 
-    public SqsService(SqsConfiguration sqsConfiguration, SystemConfiguration systemConfiguration, JmsConfiguration jmsConfiguration) {
+    public KafkaService(SqsConfiguration sqsConfiguration, SystemConfiguration systemConfiguration) {
         this.sqsConfiguration = sqsConfiguration;
         this.systemConfiguration = systemConfiguration;
-        this.jmsConfiguration = jmsConfiguration;
     }
 
-    @Override
     public List<String> listQueues() {
         return getSqsClient().listQueues().queueUrls();
     }
 
-    @Override
     public String createQueue(String queueName) {
         CreateQueueResponse response = getSqsClient().createQueue(CreateQueueRequest.builder()
                 .queueName(queueName)
@@ -40,14 +35,12 @@ public class SqsService implements MessageQueueService {
         return response.queueUrl();
     }
 
-    @Override
     public void deleteQueue(String queueUrl) {
         getSqsClient().deleteQueue(DeleteQueueRequest.builder()
                 .queueUrl(queueUrl)
                 .build());
     }
 
-    @Override
     public void sendMessage(String queueUrl, String messageBody) {
         getSqsClient().sendMessage(SendMessageRequest.builder()
                 .queueUrl(queueUrl)
@@ -55,8 +48,7 @@ public class SqsService implements MessageQueueService {
                 .build());
     }
 
-    @Override
-    public List<String> receiveMessages(String queueUrl) {
+    public List<Message> receiveMessages(String queueUrl) {
         ReceiveMessageResponse response = getSqsClient().receiveMessage(ReceiveMessageRequest.builder()
                 .queueUrl(queueUrl)
                 .maxNumberOfMessages(10)
@@ -69,18 +61,7 @@ public class SqsService implements MessageQueueService {
                     .build());
         }
 
-        return response.messages().stream().map(Message::body).toList();
-    }
-
-    @Override
-    public void sendMessageJms(String queueName, String messageBody) {
-        jmsConfiguration.getJmsTemplate("sqs").convertAndSend(queueName, messageBody);
-    }
-
-    @Override
-    public String receiveMessageJms(String queueName) {
-        Object message = jmsConfiguration.getJmsTemplate("sqs").receiveAndConvert(queueName);
-        return message != null ? message.toString() : null;
+        return response.messages();
     }
 
     private SqsClient getSqsClient() {

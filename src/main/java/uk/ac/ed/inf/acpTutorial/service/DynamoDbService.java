@@ -1,32 +1,21 @@
 package uk.ac.ed.inf.acpTutorial.service;
 
-import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.Content;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.jdbc.core.BeanPropertyRowMapper;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 import software.amazon.awssdk.services.dynamodb.model.*;
 import uk.ac.ed.inf.acpTutorial.configuration.DynamoDbConfiguration;
-import uk.ac.ed.inf.acpTutorial.configuration.SystemEnvironment;
-import uk.ac.ed.inf.acpTutorial.dto.Drone;
-import uk.ac.ed.inf.acpTutorial.entity.DroneEntity;
-import uk.ac.ed.inf.acpTutorial.mapper.DroneMapper;
-import uk.ac.ed.inf.acpTutorial.repository.DroneRepository;
+import uk.ac.ed.inf.acpTutorial.configuration.SystemConfiguration;
 
 import java.net.URI;
-import java.sql.PreparedStatement;
+import java.util.HashMap;
 import java.util.List;
-import java.util.UUID;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -34,18 +23,30 @@ import java.util.stream.Collectors;
 public class DynamoDbService {
 
     private final DynamoDbConfiguration dynamoDbConfiguration;
-    private final SystemEnvironment systemEnvironment;
+    private final SystemConfiguration systemConfiguration;
     private static final String KEY_COLUMN_NAME = "key";
 
-    public DynamoDbService(DynamoDbConfiguration dynamoDbConfiguration, SystemEnvironment systemEnvironment) {
+    public DynamoDbService(DynamoDbConfiguration dynamoDbConfiguration, SystemConfiguration systemConfiguration) {
         this.dynamoDbConfiguration = dynamoDbConfiguration;
-        this.systemEnvironment = systemEnvironment;
+        this.systemConfiguration = systemConfiguration;
     }
 
     public List<String> listTables() {
         return getDynamoDbClient().listTables().tableNames();
     }
 
+    public String getTableObject(@PathVariable String table, @PathVariable String key) {
+        GetItemResponse response = getDynamoDbClient().getItem(GetItemRequest.builder()
+                .tableName(table)
+                .key(java.util.Map.of(KEY_COLUMN_NAME, software.amazon.awssdk.services.dynamodb.model.AttributeValue.builder().s(key).build()))
+                .build());
+
+        if (response.hasItem()) {
+            return "{ \"key\": \"" + response.item().get("key").s() + " \", \"content\": \"" + response.item().get("content").s() + "\" } ";
+        } else {
+            throw new RuntimeException("Object with key " + key + " not found in table " + table);
+        }
+    }
 
     public List<String> listTableObjects(@PathVariable String table) {
         return getDynamoDbClient()
@@ -77,11 +78,24 @@ public class DynamoDbService {
         );
     }
 
-    public void createObject(@PathVariable String table, @PathVariable String key, @RequestBody String objectContent) {
+    public void createObject(String table, String key, String objectContent) {
         getDynamoDbClient().putItem(b -> b.tableName(table).item(
                 java.util.Map.of("key", software.amazon.awssdk.services.dynamodb.model.AttributeValue.builder().s(key).build(),
                         "content", software.amazon.awssdk.services.dynamodb.model.AttributeValue.builder().s(objectContent).build())
         ));
+    }
+
+
+    public void createObject(String table, String key, @RequestBody Map<String, String> attributesMap) {
+        Map<String, AttributeValue> values = new HashMap<>();
+        values.put("key", software.amazon.awssdk.services.dynamodb.model.AttributeValue.builder().s(key).build());
+
+        values.putAll(attributesMap.entrySet().stream().map(e ->
+                java.util.Map.entry(e.getKey(), software.amazon.awssdk.services.dynamodb.model.AttributeValue.builder().s(e.getValue()).build())
+        ).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+
+        getDynamoDbClient().putItem(b -> b.tableName(table).item(values));
+
     }
 
     public String getTablePrimaryKey(
@@ -107,8 +121,8 @@ public class DynamoDbService {
     private DynamoDbClient getDynamoDbClient() {
         return DynamoDbClient.builder()
                 .endpointOverride(URI.create(dynamoDbConfiguration.getDynamoDbEndpoint()))
-                .region(systemEnvironment.getAwsRegion())
-                .credentialsProvider(StaticCredentialsProvider.create(AwsBasicCredentials.create(systemEnvironment.getAwsUser(), systemEnvironment.getAwsSecret())))
+                .region(systemConfiguration.getAwsRegion())
+                .credentialsProvider(StaticCredentialsProvider.create(AwsBasicCredentials.create(systemConfiguration.getAwsUser(), systemConfiguration.getAwsSecret())))
                 .build();
     }
 

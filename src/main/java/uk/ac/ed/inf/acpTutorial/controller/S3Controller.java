@@ -9,23 +9,20 @@ import uk.ac.ed.inf.acpTutorial.configuration.S3Configuration;
 import java.net.URI;
 import java.util.List;
 
-import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.Bucket;
-import software.amazon.awssdk.services.s3.model.ListBucketsResponse;
-import software.amazon.awssdk.services.s3.model.S3Exception;
-import uk.ac.ed.inf.acpTutorial.configuration.SystemEnvironment;
+import uk.ac.ed.inf.acpTutorial.configuration.SystemConfiguration;
 
 @RestController()
 @RequestMapping("/api/v1/acp/s3")
 public class S3Controller {
 
     private final S3Configuration s3Configuration;
-    private final SystemEnvironment systemEnvironment;
+    private final SystemConfiguration systemConfiguration;
 
-    public S3Controller(S3Configuration s3Configuration, SystemEnvironment systemEnvironment) {
+    public S3Controller(S3Configuration s3Configuration, SystemConfiguration systemConfiguration) {
         this.s3Configuration = s3Configuration;
-        this.systemEnvironment = systemEnvironment;
+        this.systemConfiguration = systemConfiguration;
     }
 
 
@@ -58,8 +55,8 @@ public class S3Controller {
         return S3Client.builder()
                     .endpointOverride(URI.create(s3Configuration.getS3Endpoint()))
                     .credentialsProvider(StaticCredentialsProvider.create(
-                            AwsBasicCredentials.create(systemEnvironment.getAwsUser(), systemEnvironment.getAwsSecret())))
-                    .region(systemEnvironment.getAwsRegion())
+                            AwsBasicCredentials.create(systemConfiguration.getAwsUser(), systemConfiguration.getAwsSecret())))
+                    .region(systemConfiguration.getAwsRegion())
                     .build();
     }
 }
