@@ -1,0 +1,35 @@
+###
+GET http://127.0.0.1:8080/api/v1/acp/all/s3/acp
+
+###
+GET http://127.0.0.1:8080/api/v1/acp/single/s3/acp/Dockerfile
+
+
+###
+GET http://127.0.0.1:8080/api/v1/acp/all/dynamo/abc
+
+###
+GET http://127.0.0.1:8080/api/v1/acp/single/dynamo/abc/123
+
+###
+POST http://127.0.0.1:8080/api/v1/acp/process/dump
+Content-Type: application/json
+
+{
+    "urlPath": "https://ilp-rest-2025-bvh6e9hschfagrgy.ukwest-01.azurewebsites.net/drones"
+}
+
+###
+POST http://127.0.0.1:8080/api/v1/acp/process/dynamo
+Content-Type: application/json
+
+{
+    "urlPath": "https://ilp-rest-2025-bvh6e9hschfagrgy.ukwest-01.azurewebsites.net/drones"
+}
+
+
+
+
+
+
+

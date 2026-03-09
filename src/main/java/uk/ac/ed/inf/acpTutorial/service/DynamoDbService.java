@@ -26,6 +26,8 @@ import uk.ac.ed.inf.acpTutorial.repository.DroneRepository;
 import java.net.URI;
 import java.sql.PreparedStatement;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -59,6 +61,30 @@ public class DynamoDbService {
                 )
                 .toList();
     }
+
+    public List<Map<String, String>> listTableObjectsDirectly(String table) {
+        return getDynamoDbClient()
+                .scanPaginator(ScanRequest.builder()
+                        .tableName(table)
+                        .build())
+                .items()
+                .stream()
+                .map(item -> item.entrySet().stream()
+                        .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue() != null ?
+                                e.getValue().s() : ""))
+                ).toList();
+    }
+
+     public Map<String, String> listTableObjectsForKeyDirectly(String table, String key) {
+            return getDynamoDbClient()
+                    .getItem(GetItemRequest.builder()
+                            .tableName(table)
+                            .key(Map.of(getTablePrimaryKey(table), AttributeValue.builder().s(key).build()))
+                            .build())
+                    .item().entrySet().stream()
+                            .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue() != null ?
+                                    e.getValue().s() : ""));
+        }
 
     public void createTable(@PathVariable String table) {
         getDynamoDbClient().createTable(b -> b.tableName(table)
